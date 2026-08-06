@@ -140,7 +140,7 @@ class LoginApp:
       
         print(str(switch1)+" Switch1")
         print(str(switch2)+" Switch2")
-        asyncio.run(cm5.main(path,switch1,switch2,keywords))
+        asyncio.run(cm5.main(path,switch1,switch2,keywords,brandname))
         messagebox.showinfo("Success", "Files exported to "+path, icon='info')
         self.clear_fields()
 

@@ -39,13 +39,15 @@ markdown_list=[]
 fit_markdown_list=[]
 cleaned_html=[]
 metadata=[]
+score=[]
+urls=["https://www.axios.com","https://www.usatoday.com/news","https://apnews.com/us-news","https://www.reuters.com/world/us/"]
 
-async def main(path:str,switch1,switch2,keywords:list):
+async def main(path:str,switch1,switch2,keywords1:list,brandname:str):
 
     # Scorer Config
     scorer = KeywordRelevanceScorer(
     #keywords=["health", "care","medicare"],
-    keywords=keywords,
+    keywords=keywords1,
     weight=0.6
     )
     # Create browser config
@@ -65,7 +67,7 @@ async def main(path:str,switch1,switch2,keywords:list):
                 
                 exclude_social_media_links=True,
                 exclude_external_images=True,
-                excluded_tags=["aside","nav", "footer", "header", "form","head","ul","img"], #,"list","button","li"
+                excluded_tags=["aside","nav", "footer", "header", "form","head","ul","img","li"], #,"list","button","li"
                 deep_crawl_strategy=BestFirstCrawlingStrategy(max_depth=2,url_scorer=scorer,
                                                               max_pages=5000, 
                                                               #filter_chain=filter_chain,
@@ -77,11 +79,20 @@ async def main(path:str,switch1,switch2,keywords:list):
 
         # Test on a news site
         
-        results = await crawler.arun(
-            url="https://www.axios.com/", 
-            config=crawler_config
-        )
-       
+        results0 = asyncio.create_task(crawler.arun( url=urls[0], config=crawler_config)) 
+        results1= asyncio.create_task(crawler.arun( url=urls[1], config=crawler_config))
+        results2= asyncio.create_task(crawler.arun( url=urls[2], config=crawler_config))
+        results3= asyncio.create_task(crawler.arun( url=urls[3], config=crawler_config))
+        await results0
+        await results1
+        await results2
+        await results3
+        
+        
+        #print(str(len(results0.result()))+" - "+str(len(results1.result()))+" - "+str(len(results2.result())))
+        results=results0.result()+results1.result()+results2.result()+results3.result()
+        print(str(len(results)))
+        
         for result in results:
 
             print(f"Status: {result.status_code}")
@@ -91,7 +102,7 @@ async def main(path:str,switch1,switch2,keywords:list):
             print(result.url)
             if result.success:
                 if((len(result.markdown.raw_markdown)>200) and 
-                   (sum(util.score_keywords_count(result.markdown.raw_markdown,keywords))>=2)):
+                   (sum(util.score_keywords_count(result.markdown.raw_markdown,keywords1,brandname))>=2)):
                     
                     print("Fit Markdown (BM25 query-based):")
                     print(result.markdown.raw_markdown)
@@ -100,22 +111,24 @@ async def main(path:str,switch1,switch2,keywords:list):
                     fit_markdown_list.insert(results.index(result),result.markdown.fit_markdown)
                     cleaned_html.insert(results.index(result),result.cleaned_html)
                     metadata.insert(results.index(result),result.metadata)
+                    score.append(sum(util.score_keywords_count(result.markdown.raw_markdown,keywords1,brandname)))
+                    
                     
             else:
                 print("Error:", result.error_message)
             
-        markdown_data={"URL":url_list, "Markdown":markdown_list}
-        fit_markdown_data={"URL":url_list, "Fit Markdown":fit_markdown_list}
+        #markdown_data={"URL":url_list, "Markdown":markdown_list}
+        fit_markdown_data={"URL":url_list,"Score":score[1], "Fit Markdown":fit_markdown_list}
         cleaned_html_data={"URL":url_list, "Fit Markdown":cleaned_html}
         metadata_data={"URL":url_list, "Fit Markdown":metadata}
         
-        df_markdown_data=pd.DataFrame(data=markdown_data)
+        #df_markdown_data=pd.DataFrame(data=markdown_data)
         df_fitmarkdown_data=pd.DataFrame(data=fit_markdown_data)
         df_cleaned_html=pd.DataFrame(data=cleaned_html_data)
         df_metadata=pd.DataFrame(data=metadata_data)
         
-        df_markdown_data.to_csv(path+r"\df_markdown_data.csv")
-        df_markdown_data.to_csv(path+r"\df_markdown_data.txt")
+        #df_markdown_data.to_csv(path+r"\df_markdown_data.csv")
+        #df_markdown_data.to_csv(path+r"\df_markdown_data.txt")
         df_fitmarkdown_data.to_csv(path+r"\df_fitmarkdown_data.txt")
         df_cleaned_html.to_csv(path+r"\df_cleaned_html.txt")
         df_metadata.to_csv(path+r"\df_metadata.txt")

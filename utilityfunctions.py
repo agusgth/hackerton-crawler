@@ -30,16 +30,21 @@ def comma_del_str_tolist(comma_sep_string:str)-> list:
 
 
 
-def score_keywords_count(raw_markdown:str,key:list) -> list:
+def score_keywords_count(raw_markdown:str,key:list,brandname:str) -> list:
     score1=[0]*len(key)
+    if raw_markdown.upper().count(brandname.upper())>0:
+        score_brand=10
+    else:
+        score_brand=0
+    
     
     for y in range(len(key)):
             print(raw_markdown.upper().count(key[y].upper()))
             score1[y] = raw_markdown.upper().count(key[y].upper())
     if 0 not in score1:             
-        return(sum(score1),sum(score1)*2)      
+        return(sum(score1),sum(score1)*2,score_brand)      
     else:
-        return(sum(score1),0)
+        return(sum(score1),0,score_brand)
             
 
 
