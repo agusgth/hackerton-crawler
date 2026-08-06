@@ -118,7 +118,7 @@ async def main(path:str,switch1,switch2,keywords1:list,brandname:str):
                 print("Error:", result.error_message)
             
         #markdown_data={"URL":url_list, "Markdown":markdown_list}
-        fit_markdown_data={"URL":url_list,"Score":score[1], "Fit Markdown":fit_markdown_list}
+        fit_markdown_data={"URL":url_list,"Score":score, "Fit Markdown":fit_markdown_list}
         cleaned_html_data={"URL":url_list, "Fit Markdown":cleaned_html}
         metadata_data={"URL":url_list, "Fit Markdown":metadata}
         
