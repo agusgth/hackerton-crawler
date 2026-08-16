@@ -1,1 +1,1 @@
-Version 1.1 Changelog
+Version 1.0 Changelog
